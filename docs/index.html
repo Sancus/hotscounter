@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Heroes of the Storm Replay Timeline - Basic Demo</title>
+
+  <style type="text/css">
+    body, html {
+      font-family: Helvetica,sans-serif;
+    }
+    #visualization {
+      margin: auto;
+      width: 80%;
+    }
+    h1, h2, p, #heroblock {
+      text-align: center;
+    }
+    h3 {
+      display: inline-block;
+    }
+  </style>
+
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+  <link rel="stylesheet" type="text/css" href="visjstest_files/vis-timeline-graph2d.css">
+  <script type="text/javascript" charset="utf8" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+  <script type="text/javascript" charset="utf8" src="visjstest_files/vis.js"></script>
+</head>
+<body>
+<div>
+  <h1 id="title">Heroes of the Storm Replay Timeline - Basic Demo</h1>
+  <h2 id="mapname">Default Map Name</h2>
+  <div id="heroblock"><h3 id="heroname"></h3><h3>&nbspplayed by&nbsp</h3><h3 id="playername"></h3></div>
+  <p>Match Length - 00:<span id="matchlength"></span></p>
+  <table id="multishot" width="20%"></table><br>
+</div>
+
+
+
+<div id="visualization"></div>
+<p>
+  Click and drag to move the timeline left and right. You can also zoom in and out with the mousewheel.
+</p>
+<script type="text/javascript">
+
+  function d(n) {
+    var dt = new Date;
+    n = Math.trunc((n/16) * 1000);
+    dt.setHours(0,0,0,n);
+    return dt;
+  }
+
+  // ability_timeline is an array of objects with "start" and "group" attributes.
+  function fix_dates(ability_timeline) {
+    ability_timeline.forEach(function(element, i, timeline) {
+      timeline[i]["start"] = d(timeline[i]["start"]);
+    });
+    return ability_timeline;
+  }
+  // shortcut to extract details from the JSON structure and set on HTML DOM.
+  function detail(json_obj, name) {
+    document.getElementById(name).textContent = json_obj["details"][name];
+  }
+
+  $.ajaxSetup({beforeSend: function(xhr){
+    if (xhr.overrideMimeType)
+      {
+        xhr.overrideMimeType("application/json");
+      }
+    }
+  });
+
+  $.getJSON('VallaHana.StormReplay.json', function(data) {
+    // DOM element where the Timeline will be attached
+    var container = document.getElementById('visualization');
+    // Set basic replay details on DOM.
+    detail(data, 'mapname');
+    detail(data, 'heroname');
+    detail(data, 'playername');
+
+    last_index = data["timeline"].length - 1;
+    match_length = d(data["timeline"][last_index]["start"]);
+    document.getElementById("matchlength").textContent = match_length.toISOString().substr(14, 5);
+    $('#multishot').DataTable( {
+       "searching": false,
+       "bPaginate": false,
+       "bInfo" : false,
+        data: data["details"]["multishot"],
+          columns: [
+            { title: "MultiShot Count" },
+            { title: "Target Hit Count" },
+        ]
+    });
+
+    var options = {
+        groupOrder: 'content',
+        start: d(0),
+        min: d(0),
+        max: match_length,
+        type: 'point',
+        zoomMax: 1000000,
+        zoomMin: 10000,
+        format: {majorLabels: {second: 'HH:mm', minute: 'HH:mm'}}
+    };
+    var items = new vis.DataSet(fix_dates(data["timeline"]));
+    var groups = new vis.DataSet(data["groups"]);
+    // Create a Timeline
+    var timeline = new vis.Timeline(container, items, groups, options);
+  });
+</script>
+</body></html>
