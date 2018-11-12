@@ -14,7 +14,7 @@ print "Generating statistics and timeline."
 lines = []
 lines = [json.loads(line) for line in result.splitlines()]
 
-hero_map = {'Valla': {308: 'MultiShot', 307: 'Hungering Arrow', 310: 'Vault', 112: 'Mount'}}
+hero_map = {'Valla': {308: 'MultiShot(W)', 307: 'Hungering Arrow(Q)', 310: 'Vault(E)', 112: 'Mount(Z)'}}
 
 abil_map = {308: 'MultiShot', 307: 'Hungering Arrow', 310: 'Vault', 311: 'Strafe', 309: 'Rain of Vengeance',
             490: 'Bone Shield', 494: 'Spectral Scythe',
