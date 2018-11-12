@@ -61,14 +61,6 @@
     document.getElementById(name).textContent = json_obj["details"][name];
   }
 
-  $.ajaxSetup({beforeSend: function(xhr){
-    if (xhr.overrideMimeType)
-      {
-        xhr.overrideMimeType("application/json");
-      }
-    }
-  });
-
   $.getJSON('VallaHana.StormReplay.json', function(data) {
     // DOM element where the Timeline will be attached
     var container = document.getElementById('visualization');
